@@ -23,7 +23,16 @@ function Contato() {
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     const text = `Olá Vortis! Meu nome é ${form.nome}.%0A%0A${form.mensagem}%0A%0AContato: ${form.whatsapp} · ${form.email}`;
-    window.open(`https://wa.me/5591996316518?text=${text}`, "_blank");
+    const url = `https://wa.me/5591996316518?text=${text}`;
+    const gtag = (window as any).gtag;
+    if (typeof gtag === "function") {
+      gtag("event", "click_whatsapp", {
+        event_category: "engagement",
+        link_url: url,
+        location: "/contato#form",
+      });
+    }
+    window.open(url, "_blank");
   }
 
   return (
