@@ -15,8 +15,10 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Vortis Gestão — Tecnologia que impulsiona resultados" },
       { property: "og:description", content: "Sites, apps e sistema de gestão sob medida para empresas que querem crescer." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "/" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "/" }],
   }),
   component: Home,
 });
