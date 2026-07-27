@@ -11,8 +11,10 @@ export const Route = createFileRoute("/sobre")({
       { property: "og:title", content: "Sobre a Vortis Gestão" },
       { property: "og:description", content: "Inovação, segurança, eficiência, controle e produtividade — os pilares que guiam nosso trabalho." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "/sobre" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "/sobre" }],
   }),
   component: Sobre,
 });
