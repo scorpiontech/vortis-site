@@ -119,6 +119,40 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    const track = () => {
+      const gtag = (window as any).gtag;
+      if (typeof gtag !== "function") return;
+      gtag("event", "page_view", {
+        page_path: window.location.pathname + window.location.search,
+        page_location: window.location.href,
+        page_title: document.title,
+      });
+    };
+    track();
+    const unsub = router.subscribe("onResolved", track);
+    return () => unsub();
+  }, [router]);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      const anchor = target?.closest?.("a[href*='wa.me']") as HTMLAnchorElement | null;
+      if (!anchor) return;
+      const gtag = (window as any).gtag;
+      if (typeof gtag !== "function") return;
+      gtag("event", "click_whatsapp", {
+        event_category: "engagement",
+        link_url: anchor.href,
+        location: window.location.pathname,
+      });
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-screen flex-col">
