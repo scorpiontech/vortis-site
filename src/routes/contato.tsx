@@ -11,8 +11,10 @@ export const Route = createFileRoute("/contato")({
       { property: "og:title", content: "Contato — Vortis Gestão" },
       { property: "og:description", content: "Fale com a nossa equipe e transforme sua ideia em resultados." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "/contato" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "/contato" }],
   }),
   component: Contato,
 });

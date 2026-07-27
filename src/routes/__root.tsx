@@ -78,6 +78,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "Vortis Gestão — Tecnologia que impulsiona resultados" },
       { property: "og:description", content: "Sites, apps e sistema de gestão comercial sob medida para o seu negócio." },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Vortis Gestão" },
+      { property: "og:locale", content: "pt_BR" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [

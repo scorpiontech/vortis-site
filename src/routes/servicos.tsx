@@ -14,8 +14,10 @@ export const Route = createFileRoute("/servicos")({
       { property: "og:title", content: "Serviços da Vortis Gestão" },
       { property: "og:description", content: "Sites, apps e sistema de gestão comercial completo." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "/servicos" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "/servicos" }],
   }),
   component: Servicos,
 });
