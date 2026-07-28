@@ -12,4 +12,15 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Force a Node.js server build when running `npm run build` outside the Lovable sandbox.
+  // Output goes to ./dist (dist/server + dist/public) so the app can be hosted on any
+  // Node server. Inside the Lovable build these overrides are ignored (forced to Cloudflare).
+  nitro: {
+    preset: "node-server",
+    output: {
+      dir: "dist",
+      serverDir: "dist/server",
+      publicDir: "dist/public",
+    },
+  },
 });
