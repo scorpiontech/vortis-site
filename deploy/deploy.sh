@@ -23,21 +23,27 @@ BRANCH="${BRANCH:-main}"
 KEEP="${KEEP:-5}"
 PORT="${PORT:-3000}"
 
-REPO_DIR="$SITE_DIR/repo"
+REPO_DIR="${REPO_DIR:-$SITE_DIR/repo}"
 APP_LINK="$SITE_DIR/app"
 RELEASES_DIR="$SITE_DIR/releases"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
 RELEASE_DIR="$RELEASES_DIR/$TIMESTAMP"
 
-echo "▶ Deploy Vortis  |  site=$SITE_DIR  branch=$BRANCH"
+echo "▶ Deploy Vortis  |  site=$SITE_DIR  repo=$REPO_DIR  branch=$BRANCH"
 
 # 1) Garantir estrutura
 mkdir -p "$RELEASES_DIR"
 
-# 2) Atualizar repositório
+# 2) Localizar o .git (aceita repo/ com subpasta criada pelo clone)
 if [ ! -d "$REPO_DIR/.git" ]; then
-  echo "✖ Repositório não encontrado em $REPO_DIR. Faça o git clone antes." >&2
-  exit 1
+  FOUND_GIT="$(find "$REPO_DIR" -maxdepth 3 -type d -name .git -print -quit 2>/dev/null || true)"
+  if [ -n "$FOUND_GIT" ]; then
+    REPO_DIR="$(dirname "$FOUND_GIT")"
+    echo "▶ .git detectado em: $REPO_DIR"
+  else
+    echo "✖ Repositório git não encontrado a partir de $REPO_DIR." >&2
+    exit 1
+  fi
 fi
 
 cd "$REPO_DIR"
@@ -46,7 +52,22 @@ git fetch --prune origin
 git reset --hard "origin/$BRANCH"
 git clean -fd
 
-# 3) Instalar dependências e buildar
+# 3) Localizar package.json (raiz do projeto pode estar em subpasta)
+BUILD_DIR="$REPO_DIR"
+if [ ! -f "$BUILD_DIR/package.json" ]; then
+  FOUND_PKG="$(find "$REPO_DIR" -maxdepth 3 -type f -name package.json -not -path '*/node_modules/*' -print -quit 2>/dev/null || true)"
+  if [ -n "$FOUND_PKG" ]; then
+    BUILD_DIR="$(dirname "$FOUND_PKG")"
+    echo "▶ package.json em: $BUILD_DIR"
+  else
+    echo "✖ package.json não encontrado em $REPO_DIR." >&2
+    exit 1
+  fi
+fi
+
+cd "$BUILD_DIR"
+
+# 4) Instalar dependências e buildar
 echo "▶ npm ci"
 npm ci --no-audit --no-fund
 
@@ -59,17 +80,23 @@ if [ ! -f "dist/server/index.mjs" ]; then
   exit 1
 fi
 
-# 4) Publicar release (cópia atômica)
-echo "▶ publicando release $TIMESTAMP"
+# 5) Publicar release (cópia atômica)
+echo "▶ publicando release $TIMESTAMP em $RELEASE_DIR"
 mkdir -p "$RELEASE_DIR"
 cp -a dist/. "$RELEASE_DIR/"
 
-# 5) Trocar symlink de forma atômica
+# 6) Trocar symlink de forma atômica.
+#    Se $APP_LINK for diretório real (não symlink), remove primeiro pra permitir o swap.
+if [ -e "$APP_LINK" ] && [ ! -L "$APP_LINK" ]; then
+  echo "▶ $APP_LINK é diretório real — removendo para virar symlink"
+  rm -rf "$APP_LINK"
+fi
 ln -sfn "$RELEASE_DIR" "$APP_LINK.new"
 mv -Tf "$APP_LINK.new" "$APP_LINK"
+echo "▶ $APP_LINK -> $(readlink "$APP_LINK")"
 
-# 6) Restart do serviço (systemd)
-SERVICE_NAME="vortis.service"
+# 7) Restart do serviço (systemd)
+SERVICE_NAME="${SERVICE_NAME:-vortis.service}"
 if systemctl list-unit-files | grep -q "^${SERVICE_NAME}"; then
   echo "▶ systemctl restart $SERVICE_NAME"
   sudo systemctl restart "$SERVICE_NAME"
