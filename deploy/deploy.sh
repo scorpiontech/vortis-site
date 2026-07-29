@@ -80,17 +80,23 @@ if [ ! -f "dist/server/index.mjs" ]; then
   exit 1
 fi
 
-# 4) Publicar release (cópia atômica)
-echo "▶ publicando release $TIMESTAMP"
+# 5) Publicar release (cópia atômica)
+echo "▶ publicando release $TIMESTAMP em $RELEASE_DIR"
 mkdir -p "$RELEASE_DIR"
 cp -a dist/. "$RELEASE_DIR/"
 
-# 5) Trocar symlink de forma atômica
+# 6) Trocar symlink de forma atômica.
+#    Se $APP_LINK for diretório real (não symlink), remove primeiro pra permitir o swap.
+if [ -e "$APP_LINK" ] && [ ! -L "$APP_LINK" ]; then
+  echo "▶ $APP_LINK é diretório real — removendo para virar symlink"
+  rm -rf "$APP_LINK"
+fi
 ln -sfn "$RELEASE_DIR" "$APP_LINK.new"
 mv -Tf "$APP_LINK.new" "$APP_LINK"
+echo "▶ $APP_LINK -> $(readlink "$APP_LINK")"
 
-# 6) Restart do serviço (systemd)
-SERVICE_NAME="vortis.service"
+# 7) Restart do serviço (systemd)
+SERVICE_NAME="${SERVICE_NAME:-vortis.service}"
 if systemctl list-unit-files | grep -q "^${SERVICE_NAME}"; then
   echo "▶ systemctl restart $SERVICE_NAME"
   sudo systemctl restart "$SERVICE_NAME"
