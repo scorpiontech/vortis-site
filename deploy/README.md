@@ -90,3 +90,44 @@ sudo -u www-data SITE_DIR=/var/www/tecnorastro bash /var/www/tecnorastro/repo/de
 sudo tail -f /var/log/nginx/access.log
 sudo tail -f /var/log/nginx/error.log
 ```
+
+## 8. Erro 500 do Nginx mesmo com a pasta `app` preenchida
+
+O 500 vem do Nginx (não do site). Causas, na ordem mais comum:
+
+**1) Config antiga ainda ativa (proxy para o Node que não existe mais)**
+
+```bash
+ls -l /etc/nginx/sites-enabled/
+sudo grep -R "proxy_pass" /etc/nginx/sites-enabled/
+```
+
+Se aparecer `proxy_pass` para o vortis, substitua pela config estática:
+
+```bash
+sudo cp /var/www/vortis/repo/vortis-site/deploy/nginx-vortis.conf /etc/nginx/sites-available/vortis.conf
+sudo ln -sf /etc/nginx/sites-available/vortis.conf /etc/nginx/sites-enabled/vortis.conf
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+**2) Permissão: o Nginx (www-data) não consegue ler os arquivos**
+
+O deploy foi executado como `root`, então os arquivos ficaram com dono root.
+
+```bash
+sudo chown -R www-data:www-data /var/www/vortis/app
+sudo find /var/www/vortis/app -type d -exec chmod 755 {} \;
+sudo find /var/www/vortis/app -type f -exec chmod 644 {} \;
+sudo chmod 755 /var /var/www /var/www/vortis
+sudo systemctl reload nginx
+```
+
+**3) Ver a causa exata**
+
+```bash
+sudo tail -n 30 /var/log/nginx/error.log
+```
+
+- `Permission denied` → item 2.
+- `rewrite or internal redirection cycle` → falta `index.html`; rode o deploy de novo.
+- `connect() failed`/`upstream` → item 1 (config antiga com proxy).
