@@ -11,12 +11,23 @@ export default defineConfig({
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
     server: { entry: "server" },
+    // Gera HTML estático para cada página (SEO + hospedagem sem Node).
+    prerender: {
+      enabled: true,
+      crawlLinks: true,
+    },
+    pages: [
+      { path: "/", prerender: { enabled: true } },
+      { path: "/sobre", prerender: { enabled: true } },
+      { path: "/servicos", prerender: { enabled: true } },
+      { path: "/contato", prerender: { enabled: true } },
+    ],
   },
-  // Force a Node.js server build when running `npm run build` outside the Lovable sandbox.
-  // Output goes to ./dist (dist/server + dist/public) so the app can be hosted on any
-  // Node server. Inside the Lovable build these overrides are ignored (forced to Cloudflare).
+  // Build 100% estático quando você roda `npm run build` fora do sandbox Lovable:
+  // saída em ./dist/public (HTML + assets), servida direto pelo Nginx, sem Node em produção.
   nitro: {
-    preset: "node-server",
+    static: true,
+    preset: "static",
     output: {
       dir: "dist",
       serverDir: "dist/server",
