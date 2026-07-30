@@ -20,8 +20,11 @@ sudo mkdir -p /var/www/vortis
 sudo chown -R www-data:www-data /var/www/vortis
 sudo -u www-data git clone <URL_DO_REPO> /var/www/vortis/repo
 
-sudo cp /var/www/vortis/repo/deploy/nginx-vortis.conf /etc/nginx/sites-available/vortis.conf
-sudo ln -s /etc/nginx/sites-available/vortis.conf /etc/nginx/sites-enabled/
+NGINX_SOURCE="$(find /var/www/vortis/repo -type f -path '*/deploy/nginx-vortis.conf' -print -quit)"
+test -n "$NGINX_SOURCE" || { echo "nginx-vortis.conf não encontrado"; exit 1; }
+sudo install -m 644 "$NGINX_SOURCE" /etc/nginx/sites-available/vortis.conf
+sudo rm -f /etc/nginx/sites-enabled/vortis.conf
+sudo ln -s /etc/nginx/sites-available/vortis.conf /etc/nginx/sites-enabled/vortis.conf
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -95,18 +98,25 @@ sudo tail -f /var/log/nginx/error.log
 
 O 500 vem do Nginx (não do site). Causas, na ordem mais comum:
 
-**1) Config antiga ainda ativa (proxy para o Node que não existe mais)**
+**1) Config antiga ainda ativa (PHP ou proxy para Node)**
 
 ```bash
 ls -l /etc/nginx/sites-enabled/
-sudo grep -R "proxy_pass" /etc/nginx/sites-enabled/
+sudo grep -RIlE 'server_name.*(vortisgestao\.com\.br|www\.vortisgestao\.com\.br)' /etc/nginx/sites-enabled
+sudo grep -RInE 'proxy_pass|index\.php|fastcgi_pass' /etc/nginx/sites-enabled
 ```
 
-Se aparecer `proxy_pass` para o vortis, substitua pela config estática:
+Se mais de um arquivo configurar o domínio, remova de `sites-enabled` somente
+os links antigos da Vortis listados acima — não remova os outros sites. Depois,
+reinstale a configuração estática. O comando detecta o arquivo mesmo quando o
+clone fica dentro de uma subpasta como `repo/vortis-site/`:
 
 ```bash
-sudo cp /var/www/vortis/repo/vortis-site/deploy/nginx-vortis.conf /etc/nginx/sites-available/vortis.conf
-sudo ln -sf /etc/nginx/sites-available/vortis.conf /etc/nginx/sites-enabled/vortis.conf
+NGINX_SOURCE="$(find /var/www/vortis/repo -type f -path '*/deploy/nginx-vortis.conf' -print -quit)"
+test -n "$NGINX_SOURCE" || { echo "nginx-vortis.conf não encontrado"; exit 1; }
+sudo install -m 644 "$NGINX_SOURCE" /etc/nginx/sites-available/vortis.conf
+sudo rm -f /etc/nginx/sites-enabled/vortis.conf
+sudo ln -s /etc/nginx/sites-available/vortis.conf /etc/nginx/sites-enabled/vortis.conf
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -129,5 +139,6 @@ sudo tail -n 30 /var/log/nginx/error.log
 ```
 
 - `Permission denied` → item 2.
-- `rewrite or internal redirection cycle` → falta `index.html`; rode o deploy de novo.
+- `rewrite ... /index.php` → configuração PHP antiga/duplicada ainda ativa.
+- `open() "/etc/nginx/sites-enabled/vortis.conf" failed` → link simbólico quebrado; reinstale a configuração acima.
 - `connect() failed`/`upstream` → item 1 (config antiga com proxy).
