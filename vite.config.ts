@@ -23,14 +23,5 @@ export default defineConfig({
       { path: "/contato", prerender: { enabled: true } },
     ],
   },
-  // Build 100% estático quando você roda `npm run build` fora do sandbox Lovable:
-  // saída em ./dist/public (HTML + assets), servida direto pelo Nginx, sem Node em produção.
-  nitro: {
-    preset: "static",
-    output: {
-      dir: "dist",
-      serverDir: "dist/server",
-      publicDir: "dist/public",
-    },
-  },
 });
+
