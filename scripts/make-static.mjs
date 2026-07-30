@@ -1,60 +1,57 @@
 #!/usr/bin/env node
 /**
- * Gera um index.html (SPA shell) a partir da saída client do build.
+ * Prerender estático: renderiza cada rota usando o bundle de servidor gerado
+ * pelo build e grava o HTML dentro de dist/client, para hospedagem 100%
+ * estática (Nginx servindo arquivos, sem Node em produção).
  *
- * O build do TanStack Start entrega apenas os assets em dist/client (o HTML
- * normalmente é montado pelo servidor SSR). Para hospedagem 100% estática no
- * Nginx precisamos de um index.html que carregue o bundle e deixe o router
- * renderizar as rotas no browser.
+ * Uso: npm run build:static
  */
-import { readdirSync, writeFileSync, copyFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, writeFileSync, existsSync, cpSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { pathToFileURL } from "node:url";
 
-const CLIENT_DIR = join(process.cwd(), "dist", "client");
-const ASSETS_DIR = join(CLIENT_DIR, "assets");
+const ROUTES = ["/", "/sobre", "/servicos", "/contato"];
 
-if (!existsSync(ASSETS_DIR)) {
-  console.error("✖ dist/client/assets não encontrado. Rode `npm run build` antes.");
+const ROOT = process.cwd();
+const CLIENT_DIR = join(ROOT, "dist", "client");
+const SERVER_ENTRY = join(ROOT, "dist", "server", "index.mjs");
+
+if (!existsSync(SERVER_ENTRY)) {
+  console.error(`✖ ${SERVER_ENTRY} não encontrado. Rode \`vite build\` antes.`);
   process.exit(1);
 }
 
-const files = readdirSync(ASSETS_DIR);
-const entryJs = files.find((f) => /^index-.*\.js$/.test(f));
-const cssFiles = files.filter((f) => f.endsWith(".css"));
+const app = (await import(pathToFileURL(SERVER_ENTRY).toString())).default;
 
-if (!entryJs) {
-  console.error("✖ Bundle de entrada (assets/index-*.js) não encontrado.");
-  process.exit(1);
+// Contexto mínimo esperado pelo runtime (Cloudflare-style fetch handler).
+const env = {};
+const ctx = { waitUntil() {}, passThroughOnException() {} };
+
+let failed = false;
+
+for (const route of ROUTES) {
+  const res = await app.fetch(new Request(`http://localhost${route}`), env, ctx);
+  const html = await res.text();
+
+  if (res.status !== 200 || !html.includes("<html")) {
+    console.error(`✖ ${route} -> HTTP ${res.status}`);
+    failed = true;
+    continue;
+  }
+
+  const outFile =
+    route === "/"
+      ? join(CLIENT_DIR, "index.html")
+      : join(CLIENT_DIR, route.replace(/^\//, ""), "index.html");
+
+  mkdirSync(dirname(outFile), { recursive: true });
+  writeFileSync(outFile, html);
+  console.log(`✔ ${route} -> ${outFile.replace(ROOT + "/", "")} (${(html.length / 1024).toFixed(1)} kB)`);
 }
 
-const TITLE = "Vortis Gestão — Sites, Apps e Sistema de Gestão Comercial";
-const DESCRIPTION =
-  "Vortis Gestão: sites profissionais, apps sob medida e sistema de gestão comercial com segurança, performance e suporte.";
+if (failed) process.exit(1);
 
-const html = `<!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${TITLE}</title>
-    <meta name="description" content="${DESCRIPTION}" />
-    <meta property="og:title" content="${TITLE}" />
-    <meta property="og:description" content="${DESCRIPTION}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Vortis Gestão" />
-    <meta property="og:locale" content="pt_BR" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="/favicon.ico" />
-${cssFiles.map((f) => `    <link rel="stylesheet" href="/assets/${f}" />`).join("\n")}
-    <script type="module" src="/assets/${entryJs}"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
-</html>
-`;
+// Fallback para rotas desconhecidas (Nginx: try_files ... /404.html)
+cpSync(join(CLIENT_DIR, "index.html"), join(CLIENT_DIR, "404.html"));
 
-writeFileSync(join(CLIENT_DIR, "index.html"), html);
-copyFileSync(join(CLIENT_DIR, "index.html"), join(CLIENT_DIR, "404.html"));
-
-console.log(`✔ dist/client/index.html gerado (entry: ${entryJs}, css: ${cssFiles.join(", ") || "nenhum"})`);
+console.log("✅ Prerender concluído em dist/client");
