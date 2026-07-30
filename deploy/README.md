@@ -1,85 +1,81 @@
-# Deploy — Vortis Gestão (Ubuntu + Nginx)
+# Deploy — Vortis Gestão (site estático + Ubuntu + Nginx)
 
-Arquitetura no servidor (padrão do usuário):
+O projeto agora é buildado como **site estático** (React/Vite com páginas
+prerenderizadas). Não existe mais serviço Node em produção — o Nginx serve
+os arquivos diretamente.
 
 ```
 /var/www/vortis/
 ├── repo/                   # git clone deste projeto
-├── releases/               # cada build publicado (timestamp)
-│   ├── 20260728-101500/
-│   └── 20260728-120000/
-└── app -> releases/…       # symlink atômico apontando para a release ativa
+├── releases/               # cada build publicado (HTML/CSS/JS)
+│   └── 20260730-101500/
+└── app -> releases/…       # symlink atômico = root do Nginx
 ```
 
-Requisitos no servidor:
-- Node.js LTS (>= 20) e npm
-- Nginx
-- Usuário `www-data` com permissão em `/var/www/vortis`
-- Git
+Requisitos no servidor: Node.js LTS (>= 20) + npm (só para buildar), Nginx, Git.
 
 ## 1. Setup inicial (uma vez)
 
 ```bash
 sudo mkdir -p /var/www/vortis
 sudo chown -R www-data:www-data /var/www/vortis
-
 sudo -u www-data git clone <URL_DO_REPO> /var/www/vortis/repo
 
-# Serviço systemd (SSR Node na porta 3000)
-sudo cp /var/www/vortis/repo/deploy/vortis.service /etc/systemd/system/vortis.service
-sudo systemctl daemon-reload
-sudo systemctl enable vortis.service
-
-# Nginx (proxy reverso)
 sudo cp /var/www/vortis/repo/deploy/nginx-vortis.conf /etc/nginx/sites-available/vortis.conf
 sudo ln -s /etc/nginx/sites-available/vortis.conf /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-## 2. Deploy / atualização
+Se você já tinha o serviço antigo rodando:
 
-Rodar a cada atualização:
+```bash
+sudo systemctl disable --now vortis.service
+sudo rm -f /etc/systemd/system/vortis.service && sudo systemctl daemon-reload
+```
+
+## 2. Deploy / atualização
 
 ```bash
 sudo -u www-data SITE_DIR=/var/www/vortis BRANCH=main bash /var/www/vortis/repo/deploy/deploy.sh
 ```
 
-O script:
-1. `git fetch` + `reset --hard origin/main`
-2. `npm ci` + `npm run build` (Vite/Nitro → `dist/`)
-3. Copia `dist/` para `releases/<timestamp>/`
-4. Troca o symlink `app` para a nova release (atômico, zero downtime na troca)
-5. `systemctl restart vortis.service`
-6. Mantém apenas as últimas `KEEP=5` releases (configurável)
+O script: `git fetch/reset` → `npm ci` → `npm run build` → copia `dist/public/`
+para `releases/<timestamp>/` → troca o symlink `app` → mantém `KEEP=5` releases.
 
-## 3. HTTPS
+## 3. Build local
 
-Depois que o site estiver respondendo em HTTP:
+```bash
+npm install
+npm run build      # gera dist/public com HTML estático
+npx serve dist/public   # teste local
+```
+
+## 4. HTTPS
 
 ```bash
 sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d vortisgestao.com.br -d www.vortisgestao.com.br
 ```
 
-## 4. Rollback rápido
+## 5. Rollback rápido
 
 ```bash
 cd /var/www/vortis
-ls releases/                       # lista timestamps
+ls releases/
 ln -sfn releases/<timestamp> app.new && mv -Tf app.new app
-sudo systemctl restart vortis.service
 ```
 
-## 5. Múltiplos sites no mesmo servidor
+## 6. Múltiplos sites
 
-Este padrão (`repo/`, `app/`, `releases/`) já é isolado por pasta. Para adicionar
-outro site siga a mesma estrutura em `/var/www/<outro-site>/`, use outra porta
-(`PORT=3001`) no `.service` e outro `server_name` no Nginx.
-
-## 6. Logs
+Mesma estrutura em `/var/www/<outro-site>/`, outro `server_name` no Nginx:
 
 ```bash
-sudo journalctl -u vortis.service -f    # SSR Node
-sudo tail -f /var/log/nginx/access.log   # Nginx
+sudo -u www-data SITE_DIR=/var/www/tecnorastro bash /var/www/tecnorastro/repo/deploy/deploy.sh
+```
+
+## 7. Logs
+
+```bash
+sudo tail -f /var/log/nginx/access.log
 sudo tail -f /var/log/nginx/error.log
 ```
