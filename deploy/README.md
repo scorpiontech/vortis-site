@@ -7,9 +7,8 @@ os arquivos diretamente.
 ```
 /var/www/vortis/
 ├── repo/                   # git clone deste projeto
-├── releases/               # cada build publicado (HTML/CSS/JS)
-│   └── 20260730-101500/
-└── app -> releases/…       # symlink atômico = root do Nginx
+├── app/                    # arquivos publicados (root do Nginx)
+└── app.previous/           # cópia da publicação anterior para rollback
 ```
 
 Requisitos no servidor: Node.js LTS (>= 20) + npm (só para buildar), Nginx, Git.
@@ -39,9 +38,19 @@ sudo rm -f /etc/systemd/system/vortis.service && sudo systemctl daemon-reload
 sudo -u www-data SITE_DIR=/var/www/vortis BRANCH=main bash /var/www/vortis/repo/deploy/deploy.sh
 ```
 
+Se o clone estiver dentro de uma subpasta (por exemplo `repo/vortis-site`), o
+script detecta automaticamente o diretório que contém `.git` e `package.json`.
+
 O script: `git fetch/reset` → instala dependências (usa `bun install` se o bun estiver
-instalado, senão `npm ci`/`npm install`) → `build:static` → copia `dist/client/`
-para `releases/<timestamp>/` → troca o symlink `app` → mantém `KEEP=5` releases.
+instalado, senão `npm ci`/`npm install`) → `build:static` → normaliza a saída em
+`dist/client/` → copia para `app.new/` → troca atomicamente a pasta `app/`.
+
+Ao terminar, devem existir:
+
+```bash
+/var/www/vortis/repo/vortis-site/dist/client/index.html
+/var/www/vortis/app/index.html
+```
 
 ## 3. Build local
 
@@ -62,8 +71,9 @@ sudo certbot --nginx -d vortisgestao.com.br -d www.vortisgestao.com.br
 
 ```bash
 cd /var/www/vortis
-ls releases/
-ln -sfn releases/<timestamp> app.new && mv -Tf app.new app
+rm -rf app.failed
+mv -T app app.failed
+mv -T app.previous app
 ```
 
 ## 6. Múltiplos sites
