@@ -12,5 +12,13 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Prerender via Nitro: gera HTML estático de cada rota em dist/client,
+  // permitindo hospedar o site sem Node (Nginx servindo arquivos).
+  nitro: {
+    prerender: {
+      routes: ["/", "/sobre", "/servicos", "/contato"],
+      crawlLinks: true,
+    },
+  },
 });
 
