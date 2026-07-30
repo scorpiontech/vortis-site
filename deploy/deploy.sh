@@ -65,12 +65,25 @@ fi
 cd "$BUILD_DIR"
 
 # 3) Instalar dependências e buildar (saída estática em dist/client)
-echo "▶ npm ci"
-npm ci --no-audit --no-fund
+# O projeto usa bun.lock. Se bun existir, usamos bun; senão npm (ci só com package-lock.json).
+if command -v bun >/dev/null 2>&1; then
+  echo "▶ bun install --frozen-lockfile"
+  bun install --frozen-lockfile || bun install
+  RUN="bun run"
+else
+  if [ -f package-lock.json ]; then
+    echo "▶ npm ci"
+    npm ci --no-audit --no-fund
+  else
+    echo "▶ package-lock.json ausente — usando npm install"
+    npm install --no-audit --no-fund
+  fi
+  RUN="npm run"
+fi
 
-echo "▶ npm run build:static"
+echo "▶ $RUN build:static"
 rm -rf dist
-npm run build:static
+$RUN build:static
 
 DIST_DIR="dist/client"
 if [ ! -f "$DIST_DIR/index.html" ]; then
