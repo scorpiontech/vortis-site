@@ -64,23 +64,24 @@ fi
 
 cd "$BUILD_DIR"
 
-# 3) Instalar dependências e buildar (saída estática em dist/public)
+# 3) Instalar dependências e buildar (saída estática em dist/client)
 echo "▶ npm ci"
 npm ci --no-audit --no-fund
 
-echo "▶ npm run build"
+echo "▶ npm run build:static"
 rm -rf dist
-npm run build
+npm run build:static
 
-if [ ! -f "dist/public/index.html" ]; then
-  echo "✖ Build falhou: dist/public/index.html não existe." >&2
+DIST_DIR="dist/client"
+if [ ! -f "$DIST_DIR/index.html" ]; then
+  echo "✖ Build falhou: $DIST_DIR/index.html não existe." >&2
   exit 1
 fi
 
 # 4) Publicar release
 echo "▶ publicando release $TIMESTAMP em $RELEASE_DIR"
 mkdir -p "$RELEASE_DIR"
-cp -a dist/public/. "$RELEASE_DIR/"
+cp -a "$DIST_DIR"/. "$RELEASE_DIR/"
 
 # 5) Trocar symlink de forma atômica
 if [ -e "$APP_LINK" ] && [ ! -L "$APP_LINK" ]; then

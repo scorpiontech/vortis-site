@@ -12,5 +12,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // O HTML estático é gerado depois do build por scripts/make-static.mjs
+  // (`npm run build:static`), que renderiza cada rota e grava em dist/client.
 });
 

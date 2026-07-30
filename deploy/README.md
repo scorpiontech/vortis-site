@@ -39,15 +39,15 @@ sudo rm -f /etc/systemd/system/vortis.service && sudo systemctl daemon-reload
 sudo -u www-data SITE_DIR=/var/www/vortis BRANCH=main bash /var/www/vortis/repo/deploy/deploy.sh
 ```
 
-O script: `git fetch/reset` → `npm ci` → `npm run build` → copia `dist/public/`
+O script: `git fetch/reset` → `npm ci` → `npm run build:static` → copia `dist/client/`
 para `releases/<timestamp>/` → troca o symlink `app` → mantém `KEEP=5` releases.
 
 ## 3. Build local
 
 ```bash
 npm install
-npm run build      # gera dist/public com HTML estático
-npx serve dist/public   # teste local
+npm run build:static   # gera dist/client com HTML estático de cada rota
+npx serve dist/client  # teste local
 ```
 
 ## 4. HTTPS
