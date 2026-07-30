@@ -44,6 +44,11 @@ if [ ! -d "$REPO_DIR/.git" ]; then
 fi
 
 cd "$REPO_DIR"
+
+# Evita "detected dubious ownership" quando o repo pertence a outro usuário (ex.: www-data)
+git config --global --get-all safe.directory 2>/dev/null | grep -qx "$REPO_DIR" || \
+  git config --global --add safe.directory "$REPO_DIR"
+
 echo "▶ git fetch/reset origin/$BRANCH"
 git fetch --prune origin
 git reset --hard "origin/$BRANCH"
