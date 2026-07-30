@@ -6,7 +6,7 @@
  *
  * Uso: npm run build:static
  */
-import { mkdirSync, writeFileSync, existsSync, cpSync, rmSync } from "node:fs";
+import { mkdirSync, writeFileSync, existsSync, cpSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -32,8 +32,7 @@ if (!SERVER_ENTRY) {
 }
 
 // Normaliza a saída do Vite/Nitro: tudo que será publicado fica em dist/client.
-// Dependendo do ambiente, os assets podem ser gerados em dist/public ou .output/public.
-rmSync(CLIENT_DIR, { recursive: true, force: true });
+// Preserva assets que o Vite já tenha gravado diretamente em dist/client.
 mkdirSync(CLIENT_DIR, { recursive: true });
 for (const publicDir of PUBLIC_DIRS) {
   if (existsSync(publicDir)) {
