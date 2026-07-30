@@ -6,7 +6,7 @@
  *
  * Uso: npm run build:static
  */
-import { mkdirSync, writeFileSync, existsSync, cpSync } from "node:fs";
+import { mkdirSync, writeFileSync, existsSync, cpSync, rmSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -14,11 +14,32 @@ const ROUTES = ["/", "/sobre", "/servicos", "/contato"];
 
 const ROOT = process.cwd();
 const CLIENT_DIR = join(ROOT, "dist", "client");
-const SERVER_ENTRY = join(ROOT, "dist", "server", "index.mjs");
+const SERVER_ENTRIES = [
+  join(ROOT, "dist", "server", "index.mjs"),
+  join(ROOT, ".output", "server", "index.mjs"),
+  join(ROOT, ".output", "server", "index.js"),
+];
+const PUBLIC_DIRS = [
+  join(ROOT, "dist", "public"),
+  join(ROOT, ".output", "public"),
+];
+const SERVER_ENTRY = SERVER_ENTRIES.find(existsSync);
 
-if (!existsSync(SERVER_ENTRY)) {
-  console.error(`✖ ${SERVER_ENTRY} não encontrado. Rode \`vite build\` antes.`);
+if (!SERVER_ENTRY) {
+  console.error("✖ Bundle do servidor não encontrado após o vite build.");
+  console.error(`  Locais verificados: ${SERVER_ENTRIES.join(", ")}`);
   process.exit(1);
+}
+
+// Normaliza a saída do Vite/Nitro: tudo que será publicado fica em dist/client.
+// Dependendo do ambiente, os assets podem ser gerados em dist/public ou .output/public.
+rmSync(CLIENT_DIR, { recursive: true, force: true });
+mkdirSync(CLIENT_DIR, { recursive: true });
+for (const publicDir of PUBLIC_DIRS) {
+  if (existsSync(publicDir)) {
+    cpSync(publicDir, CLIENT_DIR, { recursive: true });
+    console.log(`✔ Assets copiados de ${publicDir.replace(ROOT + "/", "")} para dist/client`);
+  }
 }
 
 const app = (await import(pathToFileURL(SERVER_ENTRY).toString())).default;
