@@ -39,7 +39,8 @@ sudo rm -f /etc/systemd/system/vortis.service && sudo systemctl daemon-reload
 sudo -u www-data SITE_DIR=/var/www/vortis BRANCH=main bash /var/www/vortis/repo/deploy/deploy.sh
 ```
 
-O script: `git fetch/reset` → `npm ci` → `npm run build:static` → copia `dist/client/`
+O script: `git fetch/reset` → instala dependências (usa `bun install` se o bun estiver
+instalado, senão `npm ci`/`npm install`) → `build:static` → copia `dist/client/`
 para `releases/<timestamp>/` → troca o symlink `app` → mantém `KEEP=5` releases.
 
 ## 3. Build local
