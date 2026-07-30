@@ -1,5 +1,7 @@
 # Deploy — Vortis Gestão (site estático + Ubuntu + Nginx)
 
+> Para publicar um **site novo** do zero neste servidor, siga o guia completo em [`NOVO-SITE.md`](./NOVO-SITE.md).
+
 O projeto agora é buildado como **site estático** (React/Vite com páginas
 prerenderizadas). Não existe mais serviço Node em produção — o Nginx serve
 os arquivos diretamente.
