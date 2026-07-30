@@ -12,13 +12,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  // Prerender via Nitro: gera HTML estático de cada rota em dist/client,
-  // permitindo hospedar o site sem Node (Nginx servindo arquivos).
-  nitro: {
-    prerender: {
-      routes: ["/", "/sobre", "/servicos", "/contato"],
-      crawlLinks: true,
-    },
-  },
+  // O HTML estático é gerado depois do build por scripts/make-static.mjs
+  // (`npm run build:static`), que renderiza cada rota e grava em dist/client.
 });
 
