@@ -192,7 +192,30 @@ function Servicos() {
         </Section>
       </section>
 
+      {/* FAQ */}
+      <Section>
+        <SectionHeading
+          eyebrow="Dúvidas frequentes"
+          title={<>Perguntas <span className="text-accent">Frequentes</span></>}
+          description="As respostas que mais recebemos sobre sites, aplicativos e o sistema de gestão."
+        />
+        <div className="mx-auto mt-12 grid max-w-3xl gap-3">
+          {faqs.map((f) => (
+            <details
+              key={f.q}
+              className="group rounded-2xl border border-border bg-card p-5 transition hover:border-accent/60"
+            >
+              <summary className="cursor-pointer list-none font-display text-base font-semibold text-foreground marker:hidden">
+                {f.q}
+              </summary>
+              <p className="mt-3 text-sm text-muted-foreground">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </Section>
+
       {/* CTA */}
+
       <Section>
         <div className="rounded-3xl border border-border bg-gradient-to-br from-surface to-background p-10 text-center sm:p-14">
           <h3 className="font-display text-3xl font-bold sm:text-4xl">
