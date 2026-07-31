@@ -81,6 +81,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "Vortis Gestão" },
       { property: "og:locale", content: "pt_BR" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://vortisgestao.com.br/og-vortis.jpg" },
+      { property: "og:image", content: "https://vortisgestao.com.br/og-vortis.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -98,7 +102,31 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         children: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}',{send_page_view:false});`,
       },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Vortis Gestão",
+          url: "https://vortisgestao.com.br/",
+          logo: "https://vortisgestao.com.br/favicon.png",
+          image: "https://vortisgestao.com.br/og-vortis.jpg",
+          description:
+            "Sites, aplicativos e sistema de gestão comercial para empresas que querem crescer com controle, eficiência e segurança.",
+          sameAs: ["https://instagram.com/vortis.gestao"],
+          contactPoint: [
+            {
+              "@type": "ContactPoint",
+              telephone: "+55-91-99631-6518",
+              contactType: "customer service",
+              areaServed: "BR",
+              availableLanguage: "Portuguese",
+            },
+          ],
+        }),
+      },
     ],
+
   }),
   shellComponent: RootShell,
   component: RootComponent,
