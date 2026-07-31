@@ -9,8 +9,9 @@ import { Section, SectionHeading } from "@/components/site/Section";
 export const Route = createFileRoute("/servicos")({
   head: () => ({
     meta: [
-      { title: "Serviços — Vortis Gestão" },
-      { name: "description", content: "Sites, aplicativos personalizados e sistema de gestão comercial completo para empresas." },
+      { title: "Criação de Sites, Apps e Sistema de Gestão | Vortis Gestão" },
+      { name: "description", content: "Criação de sites profissionais, aplicativos personalizados e sistema de gestão comercial com estoque, financeiro, NF-e e relatórios. Peça um orçamento." },
+
       { property: "og:title", content: "Serviços da Vortis Gestão" },
       { property: "og:description", content: "Sites, apps e sistema de gestão comercial completo." },
       { property: "og:type", content: "website" },
@@ -25,12 +26,66 @@ export const Route = createFileRoute("/servicos")({
       { name: "twitter:image", content: "https://vortisgestao.com.br/og-vortis.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://vortisgestao.com.br/servicos" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Início", item: "https://vortisgestao.com.br/" },
+            { "@type": "ListItem", position: 2, name: "Serviços", item: "https://vortisgestao.com.br/servicos" },
+          ],
+        }),
+      },
+    ],
   }),
+
 
   component: Servicos,
 });
 
+const faqs: { q: string; a: string }[] = [
+  {
+    q: "Quanto custa a criação de um site profissional?",
+    a: "O valor depende do número de páginas, integrações e funcionalidades. Fazemos um orçamento gratuito pelo WhatsApp após entender o seu projeto.",
+  },
+  {
+    q: "Em quanto tempo o site fica pronto?",
+    a: "Sites institucionais ficam prontos em média entre 7 e 20 dias úteis. Aplicativos e sistemas sob medida têm prazo definido conforme o escopo.",
+  },
+  {
+    q: "O site é otimizado para aparecer no Google?",
+    a: "Sim. Todos os projetos são entregues com estrutura otimizada para SEO, carregamento rápido, versão responsiva para celular, sitemap e integração com o Google Analytics.",
+  },
+  {
+    q: "O que o sistema de gestão comercial da Vortis faz?",
+    a: "O sistema reúne dashboard, cadastro de clientes e fornecedores, controle de estoque, financeiro (contas a pagar e receber), notas fiscais, ordens de serviço e relatórios em um só lugar, acessível pelo navegador.",
+  },
+  {
+    q: "A Vortis atende empresas de todo o Brasil?",
+    a: "Sim. Todo o atendimento, desenvolvimento e suporte podem ser feitos remotamente, atendendo empresas em qualquer região do país.",
+  },
+  {
+    q: "Vocês oferecem suporte depois da entrega?",
+    a: "Sim. Oferecemos suporte contínuo, backups e manutenção para manter o seu site, aplicativo ou sistema sempre atualizado e seguro.",
+  },
+];
+
 const WHATS = "https://wa.me/5591996316518?text=Ol%C3%A1%20Vortis%2C%20quero%20contratar%20um%20servi%C3%A7o.";
+
 
 const desenvolvimento = [
   { icon: Globe, title: "Sites Profissionais", desc: "Seja encontrado, transmita confiança e conquiste mais clientes com sites rápidos, responsivos e otimizados para SEO." },
@@ -137,7 +192,30 @@ function Servicos() {
         </Section>
       </section>
 
+      {/* FAQ */}
+      <Section>
+        <SectionHeading
+          eyebrow="Dúvidas frequentes"
+          title={<>Perguntas <span className="text-accent">Frequentes</span></>}
+          description="As respostas que mais recebemos sobre sites, aplicativos e o sistema de gestão."
+        />
+        <div className="mx-auto mt-12 grid max-w-3xl gap-3">
+          {faqs.map((f) => (
+            <details
+              key={f.q}
+              className="group rounded-2xl border border-border bg-card p-5 transition hover:border-accent/60"
+            >
+              <summary className="cursor-pointer list-none font-display text-base font-semibold text-foreground marker:hidden">
+                {f.q}
+              </summary>
+              <p className="mt-3 text-sm text-muted-foreground">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </Section>
+
       {/* CTA */}
+
       <Section>
         <div className="rounded-3xl border border-border bg-gradient-to-br from-surface to-background p-10 text-center sm:p-14">
           <h3 className="font-display text-3xl font-bold sm:text-4xl">
