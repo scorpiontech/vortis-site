@@ -35,7 +35,6 @@ export const Route = createFileRoute("/")({
           name: "Vortis Gestão",
           url: "https://vortisgestao.com.br/",
           inLanguage: "pt-BR",
-philosophy: undefined,
         }),
       },
     ],
