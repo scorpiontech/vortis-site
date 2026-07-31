@@ -26,7 +26,33 @@ export const Route = createFileRoute("/servicos")({
       { name: "twitter:image", content: "https://vortisgestao.com.br/og-vortis.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://vortisgestao.com.br/servicos" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Início", item: "https://vortisgestao.com.br/" },
+            { "@type": "ListItem", position: 2, name: "Serviços", item: "https://vortisgestao.com.br/servicos" },
+          ],
+        }),
+      },
+    ],
   }),
+
 
   component: Servicos,
 });
