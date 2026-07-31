@@ -11,11 +11,19 @@ export const Route = createFileRoute("/contato")({
       { property: "og:title", content: "Contato — Vortis Gestão" },
       { property: "og:description", content: "Fale com a nossa equipe e transforme sua ideia em resultados." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/contato" },
+      { property: "og:url", content: "https://vortisgestao.com.br/contato" },
+      { property: "og:image", content: "https://vortisgestao.com.br/og-vortis.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Mascote e logo da Vortis Gestão" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Contato — Vortis Gestão" },
+      { name: "twitter:description", content: "Fale com a nossa equipe e transforme sua ideia em resultados." },
+      { name: "twitter:image", content: "https://vortisgestao.com.br/og-vortis.jpg" },
     ],
-    links: [{ rel: "canonical", href: "/contato" }],
+    links: [{ rel: "canonical", href: "https://vortisgestao.com.br/contato" }],
   }),
+
   component: Contato,
 });
 
