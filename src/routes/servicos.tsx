@@ -9,8 +9,9 @@ import { Section, SectionHeading } from "@/components/site/Section";
 export const Route = createFileRoute("/servicos")({
   head: () => ({
     meta: [
-      { title: "Serviços — Vortis Gestão" },
-      { name: "description", content: "Sites, aplicativos personalizados e sistema de gestão comercial completo para empresas." },
+      { title: "Criação de Sites, Apps e Sistema de Gestão | Vortis Gestão" },
+      { name: "description", content: "Criação de sites profissionais, aplicativos personalizados e sistema de gestão comercial com estoque, financeiro, NF-e e relatórios. Peça um orçamento." },
+
       { property: "og:title", content: "Serviços da Vortis Gestão" },
       { property: "og:description", content: "Sites, apps e sistema de gestão comercial completo." },
       { property: "og:type", content: "website" },
