@@ -15,11 +15,31 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Vortis Gestão — Tecnologia que impulsiona resultados" },
       { property: "og:description", content: "Sites, apps e sistema de gestão sob medida para empresas que querem crescer." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/" },
+      { property: "og:url", content: "https://vortisgestao.com.br/" },
+      { property: "og:image", content: "https://vortisgestao.com.br/og-vortis.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Mascote e logo da Vortis Gestão com a frase Tecnologia que impulsiona resultados" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Vortis Gestão — Tecnologia que impulsiona resultados" },
+      { name: "twitter:description", content: "Sites, apps e sistema de gestão sob medida para empresas que querem crescer." },
+      { name: "twitter:image", content: "https://vortisgestao.com.br/og-vortis.jpg" },
     ],
-    links: [{ rel: "canonical", href: "/" }],
+    links: [{ rel: "canonical", href: "https://vortisgestao.com.br/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Vortis Gestão",
+          url: "https://vortisgestao.com.br/",
+          inLanguage: "pt-BR",
+        }),
+      },
+    ],
   }),
+
   component: Home,
 });
 

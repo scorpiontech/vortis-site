@@ -11,11 +11,19 @@ export const Route = createFileRoute("/sobre")({
       { property: "og:title", content: "Sobre a Vortis Gestão" },
       { property: "og:description", content: "Inovação, segurança, eficiência, controle e produtividade — os pilares que guiam nosso trabalho." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "/sobre" },
+      { property: "og:url", content: "https://vortisgestao.com.br/sobre" },
+      { property: "og:image", content: "https://vortisgestao.com.br/og-vortis.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Mascote e logo da Vortis Gestão" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Sobre a Vortis Gestão" },
+      { name: "twitter:description", content: "Os pilares que guiam nosso trabalho: inovação, segurança, eficiência, controle e produtividade." },
+      { name: "twitter:image", content: "https://vortisgestao.com.br/og-vortis.jpg" },
     ],
-    links: [{ rel: "canonical", href: "/sobre" }],
+    links: [{ rel: "canonical", href: "https://vortisgestao.com.br/sobre" }],
   }),
+
   component: Sobre,
 });
 
