@@ -32,8 +32,8 @@ function Contato() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault();
-    const text = `Olá Vortis! Meu nome é ${form.nome}.%0A%0A${form.mensagem}%0A%0AContato: ${form.whatsapp} · ${form.email}`;
-    const url = `https://wa.me/5591996316518?text=${text}`;
+    const text = `Olá Vortis! Meu nome é ${form.nome}.\n\n${form.mensagem}\n\nContato: ${form.whatsapp}${form.email ? ` · ${form.email}` : ""}`;
+    const url = `https://wa.me/5591996316518?text=${encodeURIComponent(text)}`;
     const gtag = (window as any).gtag;
     if (typeof gtag === "function") {
       gtag("event", "click_whatsapp", {
