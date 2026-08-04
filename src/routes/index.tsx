@@ -190,12 +190,14 @@ function Home() {
                 ))}
               </div>
               <div className="mt-8">
-                <Link
-                  to="/servicos"
+                <a
+                  href="https://app.vortisgestao.com.br"
+                  target="_blank"
+                  rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-orange hover:opacity-90"
                 >
                   Conhecer o sistema <ArrowRight className="h-4 w-4" />
-                </Link>
+                </a>
               </div>
             </div>
 
