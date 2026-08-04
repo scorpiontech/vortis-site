@@ -191,7 +191,7 @@ function Home() {
               </div>
               <div className="mt-8">
                 <a
-                  href="https://app.vortisgestao.com.br"
+                  href="https://app.vortisgestao.com.br?utm_source=vortis_site&utm_medium=hero_cta&utm_campaign=conhecer_sistema"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-orange hover:opacity-90"
